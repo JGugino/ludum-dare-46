@@ -6,11 +6,18 @@ namespace GameManagement
 {
     public class CameraTracker : MonoBehaviour
     {
+        public static CameraTracker instance;
+
         public Transform cameraTarget;
 
         public Vector2 cameraOffset;
 
         public float moveSpeed = 1f;
+
+        void Awake()
+        {
+            instance = this;    
+        }
 
         void Update()
         {

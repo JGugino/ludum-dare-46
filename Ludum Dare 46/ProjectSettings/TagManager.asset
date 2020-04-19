@@ -8,6 +8,21 @@ TagManager:
   - Main-Menu-Controls-Button
   - Main-Menu-Exit-Button
   - Ground-Tiles
+  - Enemy-Left-Move-Point
+  - Enemy-Right-Move-Point
+  - Enemy
+  - Enemy-Head
+  - Being-UI
+  - Player-Spawn
+  - Loading-Screen
+  - Level-Select-Screen
+  - Main-Menu-Screen
+  - Level-One-Button
+  - Level-Two-Button
+  - Level-Three-Button
+  - Level-Four-Button
+  - Level-Select-Exit-Button
+  - Recharge-Orb
   layers:
   - Default
   - TransparentFX
