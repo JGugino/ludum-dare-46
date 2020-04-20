@@ -12,9 +12,6 @@ namespace GameManagement
 
         public Dictionary<GameAudioClip.GameClip, float> audioTimerDictionary;
 
-        private GameObject oneTimeClipGameObject;
-        private AudioSource onTimeClipAudioSource;
-
         void Awake()
         {
             if (instance == null)
@@ -37,18 +34,17 @@ namespace GameManagement
         {
             if (CanPlaySound(_gameClip))
             {
-                if (oneTimeClipGameObject == null)
-                {
-                    oneTimeClipGameObject = new GameObject("One-Time-Clip-Sound");
-                    onTimeClipAudioSource = oneTimeClipGameObject.AddComponent<AudioSource>();
-                }
+                GameObject _oneTimeClipGameObject = new GameObject("One-Time-Clip-Sound");
+                AudioSource _onTimeClipAudioSource = _oneTimeClipGameObject.AddComponent<AudioSource>();
 
                 GameAudioClip _foundGameClip = GetAudioClip(_gameClip);
                 AudioClip _clip = _foundGameClip.audioClip;
 
-                onTimeClipAudioSource.volume = _foundGameClip.clipVolume;
+                _onTimeClipAudioSource.volume = _foundGameClip.clipVolume;
 
-                onTimeClipAudioSource.PlayOneShot(_clip);
+                _onTimeClipAudioSource.PlayOneShot(_clip);
+
+                Destroy(_oneTimeClipGameObject, _clip.length);
             }
         }
 

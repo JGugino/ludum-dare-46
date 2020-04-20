@@ -13,9 +13,9 @@ namespace GameManagement
 
         public Vector2 cameraOffset;
 
-        private float moveSpeed = 2f;
+        private float moveSpeed = 5f;
 
-        public float fov = 3.98f;
+        public float fov = 3.65f;
 
         private Camera cameraComp;
 
@@ -29,7 +29,7 @@ namespace GameManagement
             cameraComp = GetComponent<Camera>();
 
             cameraComp.orthographicSize = fov;
-            cameraOffset = new Vector2(0,2.2f);
+            cameraOffset = new Vector2(0,2.1f);
         }
 
         void Update()
