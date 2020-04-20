@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 8188890734608124340}
   m_Layer: 0
   m_Name: Restore Orb
-  m_TagString: Recharge-Orb
+  m_TagString: Restore-Orb
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

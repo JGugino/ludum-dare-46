@@ -23,6 +23,20 @@ TagManager:
   - Level-Four-Button
   - Level-Select-Exit-Button
   - Recharge-Orb
+  - Death-Screen-Restart-Button
+  - Death-Screen-Exit-Button
+  - Death-Screen
+  - Controls-Screen
+  - More-Info-Screen
+  - Controls-More-Info-Button
+  - Controls-Exit-Button
+  - More-Info-Exit-Button
+  - Dying-Timer-Text
+  - Win-Screen
+  - Win-Screen-Restart-Button
+  - Win-Screen-Exit-Button
+  - Win-Trigger
+  - Restore-Orb
   layers:
   - Default
   - TransparentFX

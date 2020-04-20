@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using GameManagement.GUIInterfacing;
+using GameManagement;
 
 namespace PlayerManagement
 {
@@ -16,7 +17,7 @@ namespace PlayerManagement
 
         public float playerWalkSpeed { get; private set; } = 2.8f;
 
-        public float playerJumpForce { get; private set; } = 7.5f;
+        public float playerJumpForce { get; private set; } = 7.8f;
 
         public float warpDashForce { get; private set; } = 4.5f;
 
@@ -32,7 +33,7 @@ namespace PlayerManagement
 
         private PlayerController pController;
 
-        private float canWarpDashCurrentDelay, canWarpDashMaxDelay = 2.5f;
+        private float canWarpDashCurrentDelay, canWarpDashMaxDelay = 3f;
 
         private float canWarpJumpCurrentDelay, canWarpJumpMaxDelay = 3.5f;
 
@@ -75,6 +76,7 @@ namespace PlayerManagement
                     canWarpDash = true;
                     pController.playerAnimator.ResetTrigger("isWarpDashing");
                     canWarpDashCurrentDelay = canWarpDashMaxDelay;
+                    GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
                     return;
                 }
                 else
@@ -142,6 +144,7 @@ namespace PlayerManagement
         {
             if (canWarpDash)
             {
+                AudioManager.instance.PlaySound(GameAudioClip.GameClip.WARP_DASH);
                 if (_horInput < 0)
                 {
                     //Left
@@ -151,13 +154,7 @@ namespace PlayerManagement
                         pRigidbody2D.AddForce(Vector2.left * warpDashForce, ForceMode2D.Impulse);
                         pController.beingDecayedCharge -= 1;
                         canWarpDash = false;
-                        GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
                         pController.playerAnimator.SetTrigger("isWarpDashing");
-                        return;
-                    }
-                    else
-                    {
-                        return;
                     }
                 }
                 else if (_horInput > 0)
@@ -171,13 +168,10 @@ namespace PlayerManagement
                         canWarpDash = false;
                         GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
                         pController.playerAnimator.SetTrigger("isWarpDashing");
-                        return;
-                    }
-                    else
-                    {
-                        return;
                     }
                 }
+
+                GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
             }
         }
 
@@ -185,6 +179,7 @@ namespace PlayerManagement
         {
             if (pController.takeBeingCharge(warpJumpCost))
             {
+                AudioManager.instance.PlaySound(GameAudioClip.GameClip.WARP_JUMP);
                 canWarpJump = false;
                 isWarpJumping = true;
                 pController.playerSpriteRenderer.gameObject.SetActive(false);
@@ -203,6 +198,7 @@ namespace PlayerManagement
         {
             if (remainingJumps > 0)
             {
+                AudioManager.instance.PlaySound(GameAudioClip.GameClip.PLAYER_JUMP);
                 isJumping = true;
                 pRigidbody2D.velocity = Vector2.up * playerJumpForce;
                 pController.playerAnimator.SetTrigger("isJumping");

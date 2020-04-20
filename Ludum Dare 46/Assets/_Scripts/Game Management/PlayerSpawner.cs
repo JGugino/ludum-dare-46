@@ -18,7 +18,14 @@ namespace GameManagement
 
         void Awake()
         {
-            instance = this;
+            if (instance == null)
+            {
+                instance = this;
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
         }
 
         public void spawnPlayer()

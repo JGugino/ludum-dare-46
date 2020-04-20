@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using GameManagement;
 
 namespace PlayerManagement {
     public class BeingInterface : MonoBehaviour
     {
         public Image beingEyes, beingEyesDead;
-        public Image beingHeadFull, beingHeadQuater;
+        public Image beingHeadFullWarpDashUseable, beingHeadFullWarpDashUnuseable, beingHeadQuaterWarpDashUseable, beingHeadQuaterWarpDashUnuseable;
         public Image beingWarpJumpClosed, beingWarpJumpOpen;
         public Image beingTailFull, beingTailQuater, beingTailHalf, beingTailAlmostDead;
 
@@ -18,13 +19,37 @@ namespace PlayerManagement {
             switch (_headState)
             {
                 case BeingHeadState.FULL:
-                    beingHeadFull.gameObject.SetActive(true);
-                    beingHeadQuater.gameObject.SetActive(false);
+                        if (PlayerSpawner.instance.spawnedPlayer.pMotor.canWarpDash == true)
+                        {
+                            beingHeadFullWarpDashUseable.gameObject.SetActive(true);
+                            beingHeadFullWarpDashUnuseable.gameObject.SetActive(false);
+                            beingHeadQuaterWarpDashUseable.gameObject.SetActive(false);
+                            beingHeadQuaterWarpDashUnuseable.gameObject.SetActive(false);
+                        }
+                        else if (PlayerSpawner.instance.spawnedPlayer.pMotor.canWarpDash == false)
+                        {
+                            beingHeadFullWarpDashUseable.gameObject.SetActive(false);
+                            beingHeadFullWarpDashUnuseable.gameObject.SetActive(true);
+                            beingHeadQuaterWarpDashUseable.gameObject.SetActive(false);
+                            beingHeadQuaterWarpDashUnuseable.gameObject.SetActive(false);
+                        }
                     break;
 
                 case BeingHeadState.QUATER:
-                    beingHeadFull.gameObject.SetActive(false);
-                    beingHeadQuater.gameObject.SetActive(true);
+                    if (PlayerSpawner.instance.spawnedPlayer.pMotor.canWarpDash == true)
+                        {
+                            beingHeadFullWarpDashUseable.gameObject.SetActive(false);
+                            beingHeadFullWarpDashUnuseable.gameObject.SetActive(false);
+                            beingHeadQuaterWarpDashUseable.gameObject.SetActive(true);
+                            beingHeadQuaterWarpDashUnuseable.gameObject.SetActive(false);
+                        }
+                        else if (PlayerSpawner.instance.spawnedPlayer.pMotor.canWarpDash == false)
+                        {
+                            beingHeadFullWarpDashUseable.gameObject.SetActive(false);
+                            beingHeadFullWarpDashUnuseable.gameObject.SetActive(false);
+                            beingHeadQuaterWarpDashUseable.gameObject.SetActive(false);
+                            beingHeadQuaterWarpDashUnuseable.gameObject.SetActive(true);
+                        }
                     break;
             }
         }

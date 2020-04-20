@@ -13,7 +13,7 @@ namespace EnemyManagement
 
         public EnemyPatrolState _currentPatrolState = EnemyPatrolState.IDLE;
 
-        public bool canBeHeadKilled = false;
+        public bool canBeHeadKilled = true;
 
         private bool isIdling = false, isMoving = false, reachedLeftPoint = false,
             reachedRightPoint = false, taskIndexPicked = false, shouldRunAI = false;
@@ -21,8 +21,6 @@ namespace EnemyManagement
         private int nextTaskIndex = 0;
 
         private float activateDistance = 10f;
-
-        private Transform player;
 
         public bool isDead { get; private set; }
 
@@ -67,6 +65,8 @@ namespace EnemyManagement
                         transform.position = Vector3.MoveTowards(transform.position, new Vector3(enemyMovePoints[0].position.x, transform.position.y, transform.position.z), enemyWalkSpeed * Time.deltaTime);
                         if (!isMoving)
                         {
+                            transform.localScale = new Vector3(-1, 1, 1);
+
                             isMoving = true;
                         }
 
@@ -85,6 +85,8 @@ namespace EnemyManagement
 
                         if (!isMoving)
                         {
+                            transform.localScale = new Vector3(1, 1, 1);
+
                             isMoving = true;
                         }
                     }
@@ -137,6 +139,7 @@ namespace EnemyManagement
 
         public void KillEnemy()
         {
+            AudioManager.instance.PlaySound(GameAudioClip.GameClip.ENEMY_DIE);
             isDead = true;
             this.gameObject.SetActive(false);
         }

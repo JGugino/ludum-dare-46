@@ -25,7 +25,7 @@ namespace PlayerManagement
 
         private float currentChargeRechargeDelay, maxChargeRechargeDelay = 2;
 
-        private float currentChargeDecayDelay, maxChargeDecayDelay = 10;
+        private float currentChargeDecayDelay, maxChargeDecayDelay = 15;
         public bool canWarpJumpHere { get; private set; } = true;
 
         public Color canWarpHereColor, cantWarpHereColor;
@@ -38,7 +38,7 @@ namespace PlayerManagement
 
         private SpriteRenderer portalSpriteRenderer;
 
-        private float warpJumpRange = 6.8f;
+        private float warpJumpRange = 6.5f;
 
         [SerializeField]
         private TextMeshProUGUI currentChargeText;
@@ -92,7 +92,39 @@ namespace PlayerManagement
                     }
                 }
 
-                BeingRechargeandDecay();
+                if (DyingTimer.instance.timerStarted)
+                {
+                    AudioManager.instance.PlaySound(GameAudioClip.GameClip.DYING_TIMER_BEEP);
+
+                    if (DyingTimer.instance.timerDone && beingCurrentCharge <= 0)
+                    {
+                        DyingTimer.instance.resetTimer();
+                        GUIInterface.instance.deathScreen.SetActive(true);
+                        isDead = true;
+                        GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
+                        GUIInterface.instance.dyingTimerText.gameObject.SetActive(false);
+                    }
+                    else if (!DyingTimer.instance.timerDone && beingCurrentCharge > 0)
+                    {
+                        DyingTimer.instance.resetTimer();
+                        GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
+                        GUIInterface.instance.dyingTimerText.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    if (GUIInterface.instance.dyingTimerText.gameObject.activeSelf || DyingTimer.instance.timerDone)
+                    {
+                        GUIInterface.instance.dyingTimerText.gameObject.SetActive(false);
+                        DyingTimer.instance.resetTimer();
+                        GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
+                    }
+                }
+
+                if (!DyingTimer.instance.timerStarted)
+                {
+                    BeingRechargeandDecay();
+                }
             }
         }
 
@@ -104,7 +136,7 @@ namespace PlayerManagement
                 {
                     if (currentChargeRechargeDelay <= 0)
                     {
-                        giveBeingCharge(1);
+                        giveBeingCharge(2);
                         currentChargeRechargeDelay = maxChargeRechargeDelay;
                         GUIControls.instance.changeBeingUI(beingCurrentCharge, beingMaxCharge);
                         return;
@@ -121,7 +153,7 @@ namespace PlayerManagement
                 {
                     if (currentChargeRechargeDelay <= 0)
                     {
-                        giveBeingCharge(1);
+                        giveBeingCharge(2);
                         currentChargeRechargeDelay = maxChargeRechargeDelay;
                         GUIControls.instance.changeBeingUI(beingCurrentCharge, beingMaxCharge);
                         return;
@@ -133,7 +165,7 @@ namespace PlayerManagement
                 }
             }
 
-            if (beingCurrentCharge > 0)
+            if (beingCurrentCharge > 0 && beingDecayedCharge > beingMaxCharge/2)
             {
                 if (currentChargeDecayDelay <= 0)
                 {
@@ -170,6 +202,8 @@ namespace PlayerManagement
         {
             int _final = beingCurrentCharge - _amount;
 
+            AudioManager.instance.PlaySound(GameAudioClip.GameClip.BEING_HURT);
+
             if (_final > 0)
             {
                 beingCurrentCharge = _final;
@@ -177,9 +211,8 @@ namespace PlayerManagement
             }
             else if(_final <= 0)
             {
-                isDead = true;
                 beingCurrentCharge = 0;
-                killPlayer();
+                killBeing();
             }
 
             return false;
@@ -188,6 +221,8 @@ namespace PlayerManagement
         public void giveBeingCharge(int _amount)
         {
             int _final = beingCurrentCharge + _amount;
+
+            AudioManager.instance.PlaySound(GameAudioClip.GameClip.BEING_RECHARGE);
 
             //Use beingDecayedCharge for max charge
             if (beingDecayedCharge < beingMaxCharge)
@@ -230,10 +265,13 @@ namespace PlayerManagement
             }
         }
 
-        void killPlayer()
+        void killBeing()
         {
-            //TODO: Add in game over screen to restart level or exit to menu
-            Debug.Log("Dead");
+            AudioManager.instance.PlaySound(GameAudioClip.GameClip.BEING_DIE);
+            GUIInterface.instance.dyingTimerText.gameObject.SetActive(true);
+            DyingTimer.instance.timerStarted = true;
+            GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
+            playerState = PlayerStates.NORMAL;
             deactivatePortal();
             GUIControls.instance.changeBeingUI(beingCurrentCharge, beingMaxCharge);
         }
@@ -289,7 +327,10 @@ namespace PlayerManagement
             {
                 if (pMotor.isWarpDashing)
                 {
-                    collision.collider.GetComponentInParent<PatrolEnemyController>().KillEnemy();
+                    if (collision.collider.GetComponentInParent<PatrolEnemyController>() != null)
+                    {
+                        collision.collider.GetComponentInParent<PatrolEnemyController>().KillEnemy();
+                    }
                 }
                 else if(!pMotor.isWarpDashing)
                 {
@@ -301,6 +342,7 @@ namespace PlayerManagement
                     {
                         pMotor.pRigidbody2D.velocity = Vector2.left * 3.8f ;
                     }
+                    AudioManager.instance.PlaySound(GameAudioClip.GameClip.ENEMY_HIT);
                     takeBeingCharge(2);
                 }
             }
@@ -309,9 +351,13 @@ namespace PlayerManagement
             {
                 PatrolEnemyController _pEnemyController = collision.collider.GetComponentInParent<PatrolEnemyController>();
 
-                if (_pEnemyController.canBeHeadKilled)
+                if (_pEnemyController != null)
                 {
-                    _pEnemyController.KillEnemy();
+                    if (_pEnemyController.canBeHeadKilled)
+                    {
+                        giveBeingCharge(2);
+                        _pEnemyController.KillEnemy();
+                    }
                 }
 
                 pMotor.pRigidbody2D.velocity = Vector2.up * pMotor.playerJumpForce;
@@ -324,25 +370,40 @@ namespace PlayerManagement
         {
             string _otherTag = collision.tag;
 
+            if (_otherTag == "Win-Trigger")
+            {
+                GameController.instance.isPaused = true;
+                GUIInterface.instance.winScreen.SetActive(true);
+                DyingTimer.instance.resetTimer();
+                GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
+                GUIInterface.instance.dyingTimerText.gameObject.SetActive(false);
+            }
+
             if (_otherTag == "Recharge-Orb")
             {
+                AudioManager.instance.PlaySound(GameAudioClip.GameClip.RECHARGE_PICKUP);
                 giveBeingCharge(Random.Range(6, 12));
                 collision.gameObject.SetActive(false);
             }
 
             if (_otherTag == "Restore-Orb")
             {
-                int _amountToAdd = Random.Range(2, 5);
+                AudioManager.instance.PlaySound(GameAudioClip.GameClip.RESTORE_PICKUP);
+
+                int _amountToAdd = Random.Range(4, 10);
 
                 int _final = beingDecayedCharge + _amountToAdd;
 
-                if (_final < beingMaxCharge)
+                if (_final <= beingMaxCharge)
                 {
                     beingDecayedCharge = _final;
-                }else if (_final > beingMaxCharge)
+                }else if (_final >  beingMaxCharge)
                 {
                     beingDecayedCharge = beingMaxCharge;
                 }
+
+                AudioManager.instance.PlaySound(GameAudioClip.GameClip.BEING_RESTORE);
+
                 collision.gameObject.SetActive(false);
             }
         }
