@@ -171,22 +171,52 @@ namespace PlayerManagement
                     }
                 }
 
+                pController.warpDashParticle.gameObject.SetActive(true);
+                pController.warpDashParticle.Play();
+
                 GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
             }
         }
 
         public void teleportPlayerToPosition(Vector2 _position)
         {
-            if (pController.takeBeingCharge(warpJumpCost))
+            if (!DyingTimer.instance.timerStarted)
+            {
+                if (pController.takeBeingCharge(warpJumpCost))
+                {
+                    AudioManager.instance.PlaySound(GameAudioClip.GameClip.WARP_JUMP);
+                    canWarpJump = false;
+                    isWarpJumping = true;
+                    pController.playerSpriteRenderer.gameObject.SetActive(false);
+                    transform.position = _position;
+                    pController.playerSpriteRenderer.gameObject.SetActive(true);
+                    isWarpJumping = false;
+                    pController.beingDecayedCharge -= 2;
+                    pController.deactivatePortal();
+                    GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
+                    pController.playerState = PlayerStates.NORMAL;
+                }
+                else
+                {
+                    AudioManager.instance.PlaySound(GameAudioClip.GameClip.WARP_JUMP);
+                    canWarpJump = false;
+                    isWarpJumping = true;
+                    pController.playerSpriteRenderer.gameObject.SetActive(false);
+                    transform.position = _position;
+                    pController.playerSpriteRenderer.gameObject.SetActive(true);
+                    isWarpJumping = false;
+                    pController.deactivatePortal();
+                    GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
+                    pController.playerState = PlayerStates.NORMAL;
+                }
+                pController.teleportParticle.transform.position = _position;
+                pController.teleportParticle.Play();
+            }
+            else
             {
                 AudioManager.instance.PlaySound(GameAudioClip.GameClip.WARP_JUMP);
                 canWarpJump = false;
-                isWarpJumping = true;
-                pController.playerSpriteRenderer.gameObject.SetActive(false);
-                transform.position = _position;
-                pController.playerSpriteRenderer.gameObject.SetActive(true);
                 isWarpJumping = false;
-                pController.beingDecayedCharge -= 2;
                 pController.deactivatePortal();
                 GUIControls.instance.changeBeingUI(pController.beingCurrentCharge, pController.beingMaxCharge);
                 pController.playerState = PlayerStates.NORMAL;

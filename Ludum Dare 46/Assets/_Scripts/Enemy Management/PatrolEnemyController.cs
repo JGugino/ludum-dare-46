@@ -24,6 +24,8 @@ namespace EnemyManagement
 
         public bool isDead { get; private set; }
 
+        public ParticleSystem enemyDeath;
+
         void Update()
         {
             if (!GameController.instance.isPaused)

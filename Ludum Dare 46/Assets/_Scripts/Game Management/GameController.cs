@@ -18,7 +18,8 @@ namespace GameManagement
 
         void Awake()
         {
-            if (instance != null) {
+            if (instance != null)
+            {
                 Destroy(this.gameObject);
             }
             else
@@ -29,6 +30,7 @@ namespace GameManagement
 
         public void StartLevelLoad(int _level)
         {
+            DyingTimer.instance.resetTimer();
             StartCoroutine(LoadLevel(_level));
         }
 
@@ -68,11 +70,13 @@ namespace GameManagement
 
         public void startLevelRestart()
         {
+            DyingTimer.instance.resetTimer();
             StartCoroutine(restartLevel());
         }
 
         public void startExitToMenu()
         {
+            DyingTimer.instance.resetTimer();
             StartCoroutine(exitToMenu());
         }
 
@@ -113,11 +117,9 @@ namespace GameManagement
                 _loadingScreen.SetActive(true);
             }
 
-            yield return new WaitForSeconds(0.8f);
+            yield return new WaitForSeconds(1f);
 
             UnityEngine.SceneManagement.SceneManager.LoadScene(0);
-
-            StopAllCoroutines();
         }
     }
 }

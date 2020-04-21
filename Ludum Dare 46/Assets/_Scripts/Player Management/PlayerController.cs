@@ -21,6 +21,8 @@ namespace PlayerManagement
 
         public bool isDead { get; private set; } = false;
 
+        private bool beingDying = false;
+
         public PlayerStates playerState = PlayerStates.NORMAL;
 
         private float currentChargeRechargeDelay, maxChargeRechargeDelay = 2;
@@ -40,8 +42,7 @@ namespace PlayerManagement
 
         private float warpJumpRange = 6.5f;
 
-        [SerializeField]
-        private TextMeshProUGUI currentChargeText;
+        public ParticleSystem teleportParticle, auraParticle, itemPickup, warpDashParticle;
 
         void Start()
         {
@@ -92,26 +93,37 @@ namespace PlayerManagement
                     }
                 }
 
+                //if (beingDying)
+                //{
+                //    if (!DyingTimer.instance.timerStarted && UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex != 0)
+                //    {
+                //        DyingTimer.instance.timerStarted = true;
+                //    }
+                //}
+
                 if (DyingTimer.instance.timerStarted)
                 {
                     AudioManager.instance.PlaySound(GameAudioClip.GameClip.DYING_TIMER_BEEP);
 
                     if (DyingTimer.instance.timerDone && beingCurrentCharge <= 0)
                     {
-                        DyingTimer.instance.resetTimer();
+                        teleportParticle.transform.position = transform.position;
+                        teleportParticle.Play();
                         GUIInterface.instance.deathScreen.SetActive(true);
                         isDead = true;
-                        GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
                         GUIInterface.instance.dyingTimerText.gameObject.SetActive(false);
+                        beingDying = false;
                     }
-                    else if (!DyingTimer.instance.timerDone && beingCurrentCharge > 0)
+                    
+                    if (!DyingTimer.instance.timerDone && beingCurrentCharge > 0)
                     {
                         DyingTimer.instance.resetTimer();
-                        GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
                         GUIInterface.instance.dyingTimerText.gameObject.SetActive(false);
+                        beingDying = false;
                     }
+                    GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
                 }
-                else
+                else if(!DyingTimer.instance.timerStarted)
                 {
                     if (GUIInterface.instance.dyingTimerText.gameObject.activeSelf || DyingTimer.instance.timerDone)
                     {
@@ -191,10 +203,13 @@ namespace PlayerManagement
             portalTransform.position = _mousePos;
 
             portalTransform.gameObject.SetActive(true);
+
+            auraParticle.gameObject.SetActive(true);
         }
         public void deactivatePortal()
         {
             portalTransform.gameObject.SetActive(false);
+            auraParticle.gameObject.SetActive(false);
             portalTransform.position = Vector2.zero;
         }
 
@@ -213,6 +228,7 @@ namespace PlayerManagement
             {
                 beingCurrentCharge = 0;
                 killBeing();
+                return true;
             }
 
             return false;
@@ -263,17 +279,22 @@ namespace PlayerManagement
             {
                 beingCurrentCharge = 0;
             }
+
+            DyingTimer.instance.resetTimer();
         }
 
         void killBeing()
         {
-            AudioManager.instance.PlaySound(GameAudioClip.GameClip.BEING_DIE);
             GUIInterface.instance.dyingTimerText.gameObject.SetActive(true);
             DyingTimer.instance.timerStarted = true;
             GUIControls.instance.updateDyingTimerText(DyingTimer.instance.DetermineMinutesAndSeconds());
+            AudioManager.instance.PlaySound(GameAudioClip.GameClip.BEING_DIE);
             playerState = PlayerStates.NORMAL;
             deactivatePortal();
             GUIControls.instance.changeBeingUI(beingCurrentCharge, beingMaxCharge);
+            beingDying = true;
+
+            Debug.Log("Being Died");
         }
 
         bool VaildSpot(Collider2D[] _objects)
@@ -401,6 +422,8 @@ namespace PlayerManagement
                 {
                     beingDecayedCharge = beingMaxCharge;
                 }
+
+                giveBeingCharge(Random.Range(2, 4));
 
                 AudioManager.instance.PlaySound(GameAudioClip.GameClip.BEING_RESTORE);
 

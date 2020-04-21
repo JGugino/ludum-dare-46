@@ -22,7 +22,7 @@ namespace PlayerManagement
                 if (Input.GetKeyDown(KeyCode.Escape))
                 {
                     AudioManager.instance.PlaySound(GameAudioClip.GameClip.BUTTON_CLICK);
-                    StartCoroutine(GameController.instance.exitToMenu());
+                    GameController.instance.startExitToMenu();
                 }
 
                 if (pController.playerState == PlayerStates.NORMAL && !pController.isDead)

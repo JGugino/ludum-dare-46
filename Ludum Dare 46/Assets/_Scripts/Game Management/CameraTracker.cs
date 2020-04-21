@@ -29,11 +29,13 @@ namespace GameManagement
             cameraComp = GetComponent<Camera>();
 
             cameraComp.orthographicSize = fov;
-            cameraOffset = new Vector2(0,2.1f);
+            cameraOffset = new Vector2(0,1.75f);
         }
 
         void Update()
         {
+            AudioManager.instance.PlaySound(GameAudioClip.GameClip.LEVEL_BACKGROUND);
+
             if (cameraTarget != null)
             {
                 if (fov != cameraComp.fieldOfView)

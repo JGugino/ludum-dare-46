@@ -11,15 +11,22 @@ namespace GameManagement
 
         //Time in seconds
         public float maxTimerLength;
-        public float timerLength { get; private set; }
+        public float timerLength;
 
         public bool timerStarted = false;
 
-        public bool timerDone { get; private set; } = false;
+        public bool timerDone = false;
 
         void Awake()
         {
-            instance = this;    
+            if (instance == null)
+            {
+                instance = this;
+            }
+            else
+            {
+                Destroy(this.gameObject);
+            }
         }
 
         void Start()
@@ -29,14 +36,17 @@ namespace GameManagement
 
         void Update()
         {
-            if (!GameController.instance.isPaused)
-            {
                 if (timerStarted && !timerDone)
                 {
+                    Debug.Log("timer running");
+
                     timerLength -= Time.deltaTime;
                     float[] _minSeconds = DetermineMinutesAndSeconds();
 
-                    GUIControls.instance.updateDyingTimerText(_minSeconds);
+                    if (GUIInterface.instance.dyingTimerText != null)
+                    {
+                        GUIControls.instance.updateDyingTimerText(_minSeconds);
+                    }
 
                     if (timerLength <= 0)
                     {
@@ -44,7 +54,6 @@ namespace GameManagement
                         return;
                     }
                 }
-            }
         }
 
         public float[] DetermineMinutesAndSeconds()

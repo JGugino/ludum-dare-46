@@ -124,6 +124,8 @@ namespace GameManagement.GUIInterfacing
                 GUIControls.instance.disableLevelSelectScreen();
             });
 
+            controlsScreen.SetActive(false);
+            moreInfoScreen.SetActive(false);
             levelSelectScreen.SetActive(false);
         }
 

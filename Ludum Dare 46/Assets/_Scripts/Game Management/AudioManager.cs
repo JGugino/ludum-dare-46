@@ -18,7 +18,7 @@ namespace GameManagement
             {
                 instance = this;
             }
-            else
+            else if(instance != null)
             {
                 Destroy(this.gameObject);
             }
@@ -28,41 +28,100 @@ namespace GameManagement
         {
             audioTimerDictionary = new Dictionary<GameAudioClip.GameClip, float>();
             audioTimerDictionary.Add(GameAudioClip.GameClip.DYING_TIMER_BEEP, 0);
+            audioTimerDictionary.Add(GameAudioClip.GameClip.MENU_BACKGROUND, 0);
+            audioTimerDictionary.Add(GameAudioClip.GameClip.LEVEL_BACKGROUND, 0);
         }
 
         public void PlaySound(GameAudioClip.GameClip _gameClip)
         {
-            if (CanPlaySound(_gameClip))
+            GameAudioClip _foundGameClip = GetAudioClip(_gameClip);
+
+            if (CanPlaySound(_foundGameClip))
             {
                 GameObject _oneTimeClipGameObject = new GameObject("One-Time-Clip-Sound");
                 AudioSource _onTimeClipAudioSource = _oneTimeClipGameObject.AddComponent<AudioSource>();
 
-                GameAudioClip _foundGameClip = GetAudioClip(_gameClip);
+                _oneTimeClipGameObject.name = _foundGameClip.name;
                 AudioClip _clip = _foundGameClip.audioClip;
 
                 _onTimeClipAudioSource.volume = _foundGameClip.clipVolume;
 
-                _onTimeClipAudioSource.PlayOneShot(_clip);
+                _onTimeClipAudioSource.clip = _clip;
+
+                _onTimeClipAudioSource.Play();
 
                 Destroy(_oneTimeClipGameObject, _clip.length);
             }
         }
 
-        private bool CanPlaySound(GameAudioClip.GameClip _gameClip)
+        private bool CanPlaySound(GameAudioClip _gameClip)
         {
-            switch (_gameClip)
+            switch (_gameClip.gameClip)
             {
                 default:
                     return true;
 
                 case GameAudioClip.GameClip.DYING_TIMER_BEEP:
-                    if (audioTimerDictionary.ContainsKey(_gameClip))
+                    if (audioTimerDictionary.ContainsKey(_gameClip.gameClip))
                     {
-                        float _lastTimePlayed = audioTimerDictionary[_gameClip];
-                        float _timeBetweenPlays = GetAudioClip(_gameClip).audioClip.length;
+                        float _lastTimePlayed = audioTimerDictionary[_gameClip.gameClip];
+
+                        float _timeBetweenPlays = GetAudioClip(_gameClip.gameClip).audioClip.length;
                         if (_lastTimePlayed + _timeBetweenPlays < Time.time)
                         {
-                            audioTimerDictionary[_gameClip] = Time.time;
+                            audioTimerDictionary[_gameClip.gameClip] = Time.time;
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+
+                case GameAudioClip.GameClip.MENU_BACKGROUND:
+                    if (audioTimerDictionary.ContainsKey(_gameClip.gameClip))
+                    {
+                        float _lastTimePlayed = audioTimerDictionary[_gameClip.gameClip];
+                        float _timeBetweenPlays = GetAudioClip(_gameClip.gameClip).audioClip.length;
+
+                        if (_lastTimePlayed <= 0 && !GameObject.Find(_gameClip.name))
+                        {
+                            audioTimerDictionary[_gameClip.gameClip] = Time.time;
+                            return true;
+                        }
+                        else if (_lastTimePlayed + _timeBetweenPlays < Time.time)
+                        {
+                            audioTimerDictionary[_gameClip.gameClip] = Time.time;
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+
+                case GameAudioClip.GameClip.LEVEL_BACKGROUND:
+                    if (audioTimerDictionary.ContainsKey(_gameClip.gameClip))
+                    {
+                        float _lastTimePlayed = audioTimerDictionary[_gameClip.gameClip];
+                        float _timeBetweenPlays = GetAudioClip(_gameClip.gameClip).audioClip.length;
+
+                        if (_lastTimePlayed <= 0 && !GameObject.Find(_gameClip.name))
+                        {
+                            audioTimerDictionary[_gameClip.gameClip] = Time.time;
+                            return true;
+                        }
+                        else if (_lastTimePlayed + _timeBetweenPlays < Time.time)
+                        {
+                            audioTimerDictionary[_gameClip.gameClip] = Time.time;
                             return true;
                         }
                         else
@@ -116,7 +175,9 @@ namespace GameManagement
             PLAYER_JUMP,
             DYING_TIMER_BEEP,
             WARP_DASH,
-            WARP_JUMP
+            WARP_JUMP,
+            MENU_BACKGROUND,
+            LEVEL_BACKGROUND
         };
     }
 }
